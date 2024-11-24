@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --bg-light: #f9fafb;
+    --bg-dark: #1f2937;
+  }

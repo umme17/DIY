@@ -1,0 +1,14 @@
+Frontend:
+
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init
+npm install axios react-router-dom
+
+backend:
+npm init -y
+npm install express mongoose cors dotenv
+npm install -D typescript @types/express @types/cors ts-node
+npx tsc --init
+npm install --save-dev ts-node
+
+    <div className=" min-h-screen">
