@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaStar, FaUser, FaComment } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -6,27 +6,115 @@ interface ThreadListProps {
   searchTerm: string;
 }
 
+interface Thread {
+  forum_id: number;
+  forum_title: string;
+  author: string;
+  category: string;
+  replies: number;
+  created_at: string;
+}
+
 const ThreadList: React.FC<ThreadListProps> = ({ searchTerm }) => {
+  const [threads, setThreads] = useState<Thread[]>([]);
   const [activeTab, setActiveTab] = useState("All");
   const navigate = useNavigate();
 
-  // Filter threads based on the search term and active tab
-  const filteredThreads = threads.filter((thread) => {
-    const matchesSearch =
-      thread.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      thread.category.toLowerCase().includes(searchTerm.toLowerCase());
+  const token = localStorage.getItem("token");
 
-    if (activeTab === "All") return matchesSearch;
-    if (activeTab === "Unanswered") return thread.replies === 0 && matchesSearch;
-    if (activeTab === "Latest") return matchesSearch; // Add logic for "Latest" if needed
-    if (activeTab === "Popular") return thread.replies >= 10 && matchesSearch;
+  const getRelativeTime = (date: string): string => {
+    const now = new Date();
+    const givenDate = new Date(date);
+    const diffInMs = now.getTime() - givenDate.getTime();
 
-    return matchesSearch;
-  });
+    const seconds = Math.floor(diffInMs / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+    if (years > 0) return rtf.format(-years, "year");
+    if (months > 0) return rtf.format(-months, "month");
+    if (weeks > 0) return rtf.format(-weeks, "week");
+    if (days > 0) return rtf.format(-days, "day");
+    if (hours > 0) return rtf.format(-hours, "hour");
+    if (minutes > 0) return rtf.format(-minutes, "minute");
+    return rtf.format(-seconds, "second");
+  };
+
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/forums/all", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch threads: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const formattedThreads = data.forums.map((forum: any) => ({
+          forum_id: forum.forum_id,
+          forum_title: forum.forum_title,
+          author: forum.user_name,
+          category:  Array.isArray(forum.tags) ? forum.tags : JSON.parse(forum.tags),
+          replies: forum.comment_count,
+          created_at: forum.created_at,
+        }));
+
+        setThreads(formattedThreads);
+      } catch (error) {
+        console.error("Failed to fetch threads:", error);
+      }
+    };
+
+    fetchThreads();
+  }, []);
+
+const filteredThreads = threads.filter((thread) => {
+  const now = new Date();
+
+  // Helper function to calculate the time difference in hours
+  const hoursSinceCreation = (createdAt: string): number => {
+    const createdDate = new Date(createdAt);
+    return (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+  };
+
+  const matchesSearch =
+    thread.forum_title.toLowerCase().includes(searchTerm.toLowerCase())
+    // thread.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+  if (activeTab === "All") return matchesSearch;
+
+  if (activeTab === "Unanswered") {
+    // Threads with 0 replies
+    return thread.replies === 0 && matchesSearch;
+  }
+
+  if (activeTab === "Latest") {
+    // Threads created within the last 24 hours
+    return hoursSinceCreation(thread.created_at) <= 24 && matchesSearch;
+  }
+
+  if (activeTab === "Popular") {
+    // Threads with 10+ replies and created within the last 7 days
+    return thread.replies >= 10 && hoursSinceCreation(thread.created_at) <= 7 * 24 && matchesSearch;
+  }
+
+  return matchesSearch;
+});
+
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Top Navigation Tabs */}
       <div className="sticky top-0 bg-white p-4 z-50 shadow-md">
         <div className="flex gap-8 justify-center text-sm sm:text-base font-medium text-gray-600">
           {[
@@ -61,28 +149,38 @@ const ThreadList: React.FC<ThreadListProps> = ({ searchTerm }) => {
         </div>
       </div>
 
-      {/* Thread List */}
       <div className="flex-1 overflow-y-auto p-4">
         <ul className="space-y-4">
-          {filteredThreads.map((thread, index) => (
+          {filteredThreads.map((thread) => (
             <li
-              key={index}
-              onClick={() => navigate(`/thread/${index}`)}
+            key={thread.forum_id}
+            onClick={() =>
+              navigate(`/thread/${thread.forum_id}`, { state: { thread } })
+            }
               className="flex flex-col sm:flex-row justify-between p-5 bg-white rounded-lg shadow hover:shadow-md transition duration-300 border border-gray-200"
             >
               <div>
                 <h3 className="font-semibold text-lg text-gray-800 hover:text-purple-600 transition duration-300 cursor-pointer">
-                  {thread.title}
+                  {thread.forum_title}
                 </h3>
                 <div className="flex items-center text-sm text-gray-600 mt-2 gap-3">
                   <div className="flex items-center">
                     <FaUser className="mr-2 text-gray-400" />
                     <span>{thread.author}</span>
                   </div>
-                  <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium">
-                    {thread.category}
+                  <span className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-medium">
+                  {Array.isArray(thread.category)
+                    ? thread.category.map((tag, index) => (
+                 <span
+                     key={index}
+          className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium"
+         >
+          {tag}
+        </span>
+      ))
+    : null}
                   </span>
-                  <span className="text-gray-400">{thread.time}</span>
+                  <span className="text-gray-400">{getRelativeTime(thread.created_at)}</span>
                 </div>
               </div>
 
@@ -107,91 +205,3 @@ const ThreadList: React.FC<ThreadListProps> = ({ searchTerm }) => {
 };
 
 export default ThreadList;
-
-export const threads = [
-    {
-      title: "How to Improve Game Graphics on a Budget",
-      author: "Daniel Pierce",
-      category: "Game Development",
-      replies: 12,
-      time: "5 minutes ago",
-    },
-    {
-      title: "Top 10 Indie Games to Try This Year",
-      author: "Samantha Clark",
-      category: "Gaming News",
-      replies: 8,
-      time: "10 minutes ago",
-    },
-    {
-      title: "Best Multiplayer Games for 2024",
-      author: "John Doe",
-      category: "Game Reviews",
-      replies: 20,
-      time: "15 minutes ago",
-    },
-    {
-      title: "How to Build a Game from Scratch",
-      author: "Sarah Johnson",
-      category: "Game Development",
-      replies: 16,
-      time: "20 minutes ago",
-    },
-    {
-      title: "Is AI Taking Over Game Development?",
-      author: "Emma Wilson",
-      category: "Tech Discussions",
-      replies: 34,
-      time: "30 minutes ago",
-    },
-    {
-      title: "Speedrunning: Tips for Beginners",
-      author: "James Carter",
-      category: "Gaming Tips",
-      replies: 5,
-      time: "40 minutes ago",
-    },
-    {
-      title: "Upcoming Gaming Conventions in 2024",
-      author: "Olivia Brown",
-      category: "Gaming News",
-      replies: 12,
-      time: "1 hour ago",
-    },
-    {
-      title: "The Evolution of VR in Gaming",
-      author: "Liam Davis",
-      category: "Tech Discussions",
-      replies: 18,
-      time: "2 hours ago",
-    },
-    {
-      title: "Best Console for Beginners in 2024",
-      author: "Sophia Taylor",
-      category: "Game Reviews",
-      replies: 7,
-      time: "3 hours ago",
-    },
-    {
-      title: "The Art of Character Design",
-      author: "Ella Thompson",
-      category: "Game Development",
-      replies: 22,
-      time: "4 hours ago",
-    },
-    {
-      title: "Top Strategies for RTS Games",
-      author: "Michael Baker",
-      category: "Gaming Tips",
-      replies: 10,
-      time: "5 hours ago",
-    },
-    {
-      title: "How to Make Money as a Game Streamer",
-      author: "Lucas Johnson",
-      category: "Streaming Tips",
-      replies: 40,
-      time: "1 day ago",
-    },
-  ];
-

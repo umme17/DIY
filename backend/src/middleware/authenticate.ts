@@ -13,13 +13,12 @@ export const authenticate = (
   const authHeader = req.headers.authorization;
 
   // Log the authorization header for debugging
-  console.log(`Authorization Header: ${authHeader}`);
+
 
   // Extract the token from "Bearer <token>"
   const token = authHeader && authHeader.split(' ')[1];
 
   // Log the extracted token for debugging
-  console.log(`Extracted Token: ${token}`);
 
   if (!token) {
     res.status(401).json({ error: 'Unauthorized', message: 'Token is missing' });

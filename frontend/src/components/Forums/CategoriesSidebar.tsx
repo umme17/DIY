@@ -20,10 +20,8 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
 
   return (
     <div className="w-full bg-gray-100 p-6 border-r border-gray-200 h-full">
-      {/* Sidebar Header */}
       <h2 className="text-2xl font-bold text-gray-700 mb-4">Categories</h2>
 
-      {/* Search Input */}
       <div className="relative mb-6">
         <FaSearch className="absolute left-3 top-3 text-gray-400" />
         <input
@@ -35,7 +33,6 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
         />
       </div>
 
-      {/* Categories List */}
       <ul className="space-y-4">
         {categories.map((category, index) => (
           <li

@@ -28,7 +28,7 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token); // Store token for authenticated access
-        navigate("/createProject"); // Navigate to the dashboard after successful login
+        navigate("/dashboard"); // Navigate to the dashboard after successful login
       } else {
         const errorData = await response.json();
         alert(`Login failed: ${errorData.message}`);

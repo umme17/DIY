@@ -1,35 +1,54 @@
 import React, { useState } from "react";
 
-const TagsSection: React.FC = () => {
-  const [tags, setTags] = useState<string[]>([
-    "React",
-    "Python",
-    "Blockchain",
-    "AI",
-    "Health",
-  ]);
-  const [newTag, setNewTag] = useState("");
+interface TagsSectionProps {
+  selectedTags: string[];
+  onTagsChange: (tags: string[]) => void;
+}
+
+const TagsSection: React.FC<TagsSectionProps> = ({ selectedTags, onTagsChange }) => {
+  const initialTags = ["React", "Python", "Art", "AI", "Health"];
+  const [newTag, setNewTag] = useState<string>("");
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && newTag.trim() !== "") {
+      const trimmedTag = newTag.trim();
       // Prevent duplicate tags
-      if (!tags.includes(newTag)) {
-        setTags([...tags, newTag.trim()]);
+      if (!selectedTags.includes(trimmedTag)) {
+        const updatedTags = [...selectedTags, trimmedTag];
+        onTagsChange(updatedTags);
       }
       setNewTag(""); // Clear input after adding
+    }
+  };
+
+  const handleTagChange = (tag: string) => {
+    if (selectedTags.includes(tag)) {
+      // Remove tag if it's already selected
+      onTagsChange(selectedTags.filter((t) => t !== tag));
+    } else {
+      // Add tag if it's not selected
+      onTagsChange([...selectedTags, tag]);
     }
   };
 
   return (
     <div className="mb-6">
       <h3 className="text-sm font-medium text-gray-600 mb-2">Tags</h3>
-      {/* Default and Added Tags */}
+      {/* Initial and Added Tags */}
       <div className="space-y-2">
-        {tags.map((tag, index) => (
-          <label key={index} className="flex items-center gap-2">
-            <input type="checkbox" className="form-checkbox" /> {tag}
-          </label>
-        ))}
+        {[...initialTags, ...selectedTags.filter((tag) => !initialTags.includes(tag))].map(
+          (tag, index) => (
+            <label key={index} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                className="form-checkbox"
+                checked={selectedTags.includes(tag)}
+                onChange={() => handleTagChange(tag)}
+              />
+              {tag}
+            </label>
+          )
+        )}
       </div>
 
       {/* Add New Tag */}

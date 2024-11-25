@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { createProjectInDb, getProjectFromDb } from '../models/Project'; // Import the model function
+import { getAllProjectsFromDb } from '../models/Project';
 import path = require('path');
 
 interface Project {
@@ -29,8 +30,8 @@ export const createProject = async (req: AuthRequest, res: Response): Promise<vo
         return;
     }
 
-    // Get file path if image is uploaded
-    const cover_image = req.file ? path.resolve('uploads', req.file.filename) : null;
+    // Get only the file name if image is uploaded
+    const cover_image = req.file ? req.file.filename : null;
 
     try {
         // Call the model function to insert the project into the database
@@ -79,7 +80,6 @@ export const getProjectDetails = async (req: AuthRequest, res: Response): Promis
             res.status(404).json({ message: 'Project not found' });
             return;
         }
-
         // Return the project details
         res.status(200).json({
             message: 'Project details fetched successfully',
@@ -87,9 +87,31 @@ export const getProjectDetails = async (req: AuthRequest, res: Response): Promis
         });
     } catch (err) {
         console.error('Error fetching project details:', err);
-
         res.status(500).json({
             error: 'Failed to fetch project details',
+            details: (err as Error).message,
+        });
+    }
+};
+
+
+
+// Fetch all projects
+
+export const getAllProjects = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        // Fetch all projects from the database
+        const projects = await getAllProjectsFromDb();
+        // Return the formatted projects
+        res.status(200).json({
+            message: 'Projects fetched successfully',
+            projects,
+        });
+    } catch (err) {
+        console.error('Error fetching projects:', err);
+
+        res.status(500).json({
+            error: 'Failed to fetch projects',
             details: (err as Error).message,
         });
     }

@@ -19,7 +19,6 @@ export const insertUser = async (user: User): Promise<void> => {
       user.age,
     ]);
 
-    console.log('User added successfully!');
     connection.release(); // Release the connection back to the pool
   } catch (err) {
     console.error('Error inserting data:', (err as Error).message);
@@ -39,5 +38,23 @@ export const findUserByEmail = async (email: string): Promise<User | null> => {
   } catch (err) {
     console.error('Error retrieving user:', (err as Error).message);
     throw new Error('Database retrieval error');
+  }
+};
+
+export const findUserById = async (user_id: string): Promise<User | null> => {
+  try {
+    const connection = await connectToDatabase();
+    const query = 'SELECT id, first_name, last_name, email, age FROM users WHERE id = ?';
+    const [rows] = await connection.query(query, [user_id]);
+    connection.release();
+
+    if ((rows as any[]).length > 0) {
+      return (rows as any[])[0] as User;
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Database error:', err);
+    throw new Error('Failed to fetch user by ID');
   }
 };
