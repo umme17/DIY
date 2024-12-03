@@ -44,32 +44,7 @@ const Filter: React.FC<FilterProps> = ({ setFilters }) => {
     <div className="w-full bg-white h-full px-6 py-8 border-r border-gray-200 rounded-md overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 shadow-md">
       <h2 className="text-xl font-bold text-gray-800 mb-6">Filters</h2>
 
-      {/* Difficulty Level */}
-      <div className="mb-8">
-        <h3 className="text-base font-semibold text-gray-700 mb-3">Difficulty Level</h3>
-        <div className="space-y-3">
-          
-          {["easy", "intermediate", "advanced"].map((level) => (
-            <label
-              key={level}
-              className="flex items-center gap-3 cursor-pointer"
-            >
 
-             
-              <input
-                type="radio"
-                name="difficulty"
-                className="form-radio text-purple-600 focus:ring-purple-500"
-                checked={selectedDifficulty === level}
-                onChange={() => handleDifficultyChange(level)}
-              />
-              <span className="text-gray-800 text-sm font-medium">
-                {level.charAt(0).toUpperCase() + level.slice(1)} {/* Capitalize for display */}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
 
       {/* Tags Section */}
       <TagsSection selectedTags={selectedTags} onTagsChange={handleTagChange} />
