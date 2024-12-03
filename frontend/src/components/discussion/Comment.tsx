@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import Reaction from "./Reactions";
-import ReplyAuthor from "../mostUse/ReplyAuthorName";
 
 interface Reply {
   author: string;
@@ -39,7 +38,6 @@ const Comment: React.FC<CommentProps> = ({
   target_id,
   target_type,
   commentId,
-  user_id,
 }) => {
   const [reaction, setReaction] = useState<string | null>(null); // Reaction for the comment
   const [replyContent, setReplyContent] = useState("");
@@ -144,7 +142,6 @@ const Comment: React.FC<CommentProps> = ({
       <div className="flex items-center space-x-2">
         <FaUser className="text-purple-400" />
         <span className="font-semibold text-purple-700">{author}</span>
-        <ReplyAuthor authorId={user_id} />
         <span className="text-sm text-gray-500">{timeAgo}</span>
       </div>
 
@@ -170,7 +167,6 @@ const Comment: React.FC<CommentProps> = ({
           >
             <div className="flex items-center space-x-2">
               <FaUser className="text-purple-400" />
-              <ReplyAuthor authorId={reply.user_id} />
               <span className="text-sm text-gray-500">{reply.timeAgo}</span>
             </div>
             <p className="mt-2 text-gray-800">{reply.content}</p>

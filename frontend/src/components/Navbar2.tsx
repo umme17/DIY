@@ -3,13 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { MdFavoriteBorder, MdNotifications } from "react-icons/md";
 import logo from "../assets/logo.png";
+import ForumCreateModal from "./Forums/ForumCreateModel";
+import ConsultationCreateModal from "./Consultation/ConsultationCreateModal"; // Assuming you have this modal
 
 interface NavbarProps {
   level: string;
 }
 
 const Navbar2: React.FC<NavbarProps> = ({ level }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isForumModalOpen, setIsForumModalOpen] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false); // Modal for consultation
   const navigate = useNavigate();
 
   const handleNavigation = (path: string) => {
@@ -23,7 +27,27 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
   };
 
   const toggleProfileModal = () => {
-    setIsModalOpen((prev) => !prev);
+    setIsProfileModalOpen((prev) => !prev);
+  };
+
+  const openForumModal = () => {
+    setIsForumModalOpen(true);
+  };
+
+  const closeForumModal = () => {
+    setIsForumModalOpen(false);
+  };
+
+  const openConsultationModal = () => {
+    setIsConsultationModalOpen(true);
+  };
+
+  const closeConsultationModal = () => {
+    setIsConsultationModalOpen(false);
+  };
+
+  const handleCreateProject = () => {
+    navigate("/createProject"); // Navigate to the project creation page
   };
 
   return (
@@ -64,12 +88,32 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
         {/* Right: Buttons and Icons */}
         <div className="flex items-center gap-4 relative">
           {/* Conditional Action Button */}
-          <button
-            onClick={() => handleNavigation(level === "+ Create Project" ? "/createProject" : "/forum")}
-            className="hidden md:block bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 shadow-md transition duration-200 ease-in-out"
-          >
-            {level}
-          </button>
+          {level === "+ Create Project" && (
+            <button
+              onClick={handleCreateProject}
+              className="hidden md:block bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 shadow-md transition duration-200 ease-in-out"
+            >
+              {level}
+            </button>
+          )}
+
+          {level === "+ Create Forum" && (
+            <button
+              onClick={openForumModal}
+              className="hidden md:block bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 shadow-md transition duration-200 ease-in-out"
+            >
+              {level}
+            </button>
+          )}
+
+          {level === "+ Create Consultation" && (
+            <button
+              onClick={openConsultationModal}
+              className="hidden md:block bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 shadow-md transition duration-200 ease-in-out"
+            >
+              {level}
+            </button>
+          )}
 
           {/* Notification Icon */}
           <button className="relative p-3 hover:bg-purple-100 rounded-full transition duration-200 ease-in-out">
@@ -94,13 +138,13 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
             </button>
 
             {/* Profile Modal Dropdown */}
-            {isModalOpen && (
+            {isProfileModalOpen && (
               <div className="absolute top-12 right-0 bg-white shadow-lg border border-gray-200 rounded-lg w-48 py-2 z-50">
                 <ul className="text-sm text-gray-800">
                   <li
                     onClick={() => {
                       navigate("/profile");
-                      setIsModalOpen(false);
+                      setIsProfileModalOpen(false);
                     }}
                     className="px-4 py-2 hover:bg-purple-100 cursor-pointer"
                   >
@@ -109,7 +153,7 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
                   <li
                     onClick={() => {
                       navigate("/my-courses");
-                      setIsModalOpen(false);
+                      setIsProfileModalOpen(false);
                     }}
                     className="px-4 py-2 hover:bg-purple-100 cursor-pointer"
                   >
@@ -118,7 +162,7 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
                   <li
                     onClick={() => {
                       navigate("/my-plans");
-                      setIsModalOpen(false);
+                      setIsProfileModalOpen(false);
                     }}
                     className="px-4 py-2 hover:bg-purple-100 cursor-pointer"
                   >
@@ -136,6 +180,12 @@ const Navbar2: React.FC<NavbarProps> = ({ level }) => {
           </div>
         </div>
       </nav>
+
+      {/* Forum Create Modal */}
+      <ForumCreateModal isOpen={isForumModalOpen} onClose={closeForumModal} />
+      
+      {/* Consultation Create Modal */}
+      <ConsultationCreateModal isOpen={isConsultationModalOpen} onClose={closeConsultationModal} />
     </>
   );
 };

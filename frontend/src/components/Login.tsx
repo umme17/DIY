@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import background from "../assets/background.png";
 import logo from "../assets/logo.png"; // Import your logo
+import { fetchAllProjects } from "../controllers/ProjectController";
+import { AllProjectContext } from "../contexts/ProjectContext";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Hook to handle navigation
+  const { setProjects } = useContext(AllProjectContext) ?? { setProjects: () => {} }; // Default fallback
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,11 +27,16 @@ const Login = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(credentials),
-      },);
+      });
 
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.token); // Store token for authenticated access
+
+        // Fetch all projects after login and update context
+        const projects = await fetchAllProjects();
+        setProjects(projects); // Set fetched projects in context
+
         navigate("/dashboard"); // Navigate to the dashboard after successful login
       } else {
         const errorData = await response.json();

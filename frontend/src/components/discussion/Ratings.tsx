@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { fetchRating } from "../../controllers/RatingControllers";
 
 interface RatingsProps {
   targetId: number; // ID of the target (e.g., project)
@@ -9,24 +10,15 @@ const Ratings: React.FC<RatingsProps> = ({ targetId, onRatingChange }) => {
   const [rating, setRating] = useState(0); // Current rating by the user
   const [hoverRating, setHoverRating] = useState<number | null>(null); // Hover state for rating
 
-  // Fetch initial rating (optional, if the user already rated)
   useEffect(() => {
-    const fetchRating = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/ratings/${targetId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setRating(data.rating); // Set initial rating from the server
-        } else {
-          console.error("Failed to fetch rating:", await response.json());
-        }
-      } catch (error) {
-        console.error("Error fetching rating:", error);
-      }
+    const getRating = async () => {
+      const fetchedRating = await fetchRating(targetId); // Call the fetchRating function
+      setRating(fetchedRating); // Set the rating state with the fetched rating
     };
 
-    fetchRating();
-  }, [targetId]);
+    getRating(); // Trigger the fetch operation
+
+  }, [targetId]); // Run the effect whenever targetId changes
 
   // Handle rating change
   const handleRatingClick = async (star: number) => {

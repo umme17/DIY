@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AllProjectContext } from "../../contexts/ProjectContext";
 
-interface Project {
-  id: number;
-  image: string;
-  title: string;
-  description: string;
-  rating: number; // Placeholder for initial rating
-  views: number;
-  likes: number;
-  comments: number;
-  tags?: string[];
-  difficulty?: string;
-}
+// interface Project {
+//   id: number;
+//   image: string;
+//   title: string;
+//   description: string;
+//   rating: number; // Assuming rating is already part of the project object
+//   views: number;
+//   likes: number;
+//   comments: number;
+//   tags?: string[]; // Tags are optional
+//   difficulty?: string;
+// }
 
 interface ProjectGridProps {
   searchQuery: string;
@@ -25,88 +26,38 @@ interface ProjectGridProps {
 }
 
 const ProjectGrid: React.FC<ProjectGridProps> = ({ searchQuery, filters }) => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [averageRatings, setAverageRatings] = useState<{ [key: number]: number }>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/projects/all", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+  // Get the context values with type check
+  const context = useContext(AllProjectContext);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch projects");
-        }
+  // If the context is not yet available (null or loading), handle gracefully
+  if (!context) {
+    return <p>Context is not available.</p>;
+  }
 
-        const data = await response.json();
-        setProjects(data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { projects} = context;
 
-    fetchProjects();
-  }, []);
+  // If projects are null or undefined, return early
+  if (!projects) {
+    return <p>No projects found.</p>;
+  }
 
-  // Fetch average ratings for each project
-  useEffect(() => {
-    const fetchAverageRatings = async () => {
-      const ratings: { [key: number]: number } = {};
+  const handleProjectClick = (project_id: number) => {
+    navigate(`/displayproject/${project_id}`);
+  };
 
-      await Promise.all(
-        projects.map(async (project) => {
-          try {
-            const response = await fetch(`http://localhost:5000/api/ratings/average/${project.id}`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              ratings[project.id] = data.average_rating || 0; // Use 0 as fallback
-            }
-          } catch (err) {
-            console.error(`Failed to fetch rating for project ID: ${project.id}`);
-          }
-        })
-      );
-      setAverageRatings(ratings);
-    };
-
-    if (projects.length > 0) {
-      fetchAverageRatings();
-    }
-  }, [projects]);
-
+  // Filter projects based on the search query and filters
   const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesDifficulty = !filters.difficulty || project.difficulty === filters.difficulty;
     const matchesTags = !filters.tags || filters.tags.every((tag) => project.tags?.includes(tag) || false);
-    const matchesRating = !filters.rating || averageRatings[project.id] >= filters.rating;
-    const matchesDuration = true;
+    const matchesRating = !filters.rating || project.rating >= filters.rating; // Use the rating from the project
+    const matchesDuration = true; // You can implement a duration filter if needed
 
     return matchesSearch && matchesDifficulty && matchesTags && matchesRating && matchesDuration;
   });
 
-  const handleProjectClick = (projectId: number) => {
-    navigate(`/displayproject/${projectId}`);
-  };
-
-  if (loading) return <p>Loading projects...</p>;
-  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -133,16 +84,14 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({ searchQuery, filters }) => {
                 <svg
                   key={i}
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`h-4 w-4 ${i < (averageRatings[project.id] || 0) ? "text-yellow-500" : "text-gray-300"}`}
+                  className={`h-4 w-4 ${i < (project.rating || 0) ? "text-yellow-500" : "text-gray-300"}`} // Ensure rating is a valid number
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
                   <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                 </svg>
               ))}
-              <span className="ml-1 text-gray-600">
-                ({averageRatings[project.id] !== undefined ? averageRatings[project.id] : "Loading..."})
-              </span>
+              <span className="ml-1 text-gray-600">{project.rating}</span>
             </div>
 
             {/* Comment Count and Actions */}

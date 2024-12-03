@@ -12,7 +12,7 @@ import reactionRoutes from "./routes/reactionRoutes";
 import path from "path";
 import ratingsRoutes from "./routes/ratingsRoutes";
 import forumRoutes from "./routes/forumRoutes";
-import infoRoutes from "./routes/infoRoutes";
+import consultationRoutes from "./routes/consultationRoutes";
 
 // Load environment variables
 dotenv.config();
@@ -42,7 +42,7 @@ app.use(
 app.use(express.json());
 
 // Routes
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
@@ -52,7 +52,7 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/reactions", reactionRoutes);
 app.use("/api/ratings", ratingsRoutes);
 app.use("/api/forums", forumRoutes);
-app.use("/api/info", infoRoutes);
+app.use("/api/consultations", consultationRoutes);
 // Attach the io instance to the app for access in controllers
 app.set("io", io);
 

@@ -1,63 +1,93 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
-import { fetchProjectData } from "../controllers/ProjectController";
-import { useProjectContext } from "../contexts/ProjectContext";
+import { AiOutlineShareAlt } from "react-icons/ai";
+import CommentSection from "../components/discussion/CommentSection";
+import Navbar2 from "../components/Navbar2";
 import Reaction from "../components/discussion/Reactions";
 import Ratings from "../components/discussion/Ratings";
-import CommentSection from "../components/discussion/CommentSection";
-import { AiOutlineShareAlt } from "react-icons/ai";
-import Navbar2 from "../components/Navbar2";
+import { AllProjectContext } from "../contexts/ProjectContext";
 
 interface Project {
-  id: string;
+  id: number;
+  image: string;
+  level:string;
   title: string;
-  tags: string[];
-  level: string;
-  cover_image: string;
   description: string;
+  rating: number; // Assuming rating is already part of the project object
+  views: number;
+  likes: number;
+  comments: number;
+  tags?: string[]; // Tags are optional
+  difficulty?: string;
 }
 
 const ProjectDisplayPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { cachedProjects, setCachedProject } = useProjectContext();
-
+  const { id } = useParams<{ id: string }>(); // Get project ID from URL
   const [projectData, setProjectData] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
 
+  // Get the context values with type check
+  const context = useContext(AllProjectContext);
+
+  // If the context is not yet available (null or loading), handle gracefully
+  if (!context) {
+    return <p>Context is not available.</p>;
+  }
+
+  const { projects} = context;
+
   useEffect(() => {
-    const loadProject = async () => {
-      if (id && cachedProjects[id]) {
-        // Use cached data
-        setProjectData(cachedProjects[id]);
+    // Fetch project data from context using project id
+    const fetchProject = () => {
+      if (!projects || !id) {
+        setError("No project data available.");
         setLoading(false);
         return;
       }
 
-      try {
-        setLoading(true);
-        const token = localStorage.getItem("token");
-        const project = await fetchProjectData(id || "", token);
-        setProjectData(project);
-        setCachedProject(id || "", project); // Cache the data
-      } catch (err) {
-        setError("Failed to load project data. Please try again.");
-      } finally {
+      // Find project by id from the context
+      const foundProject = projects.find(project => project.id === parseInt(id));
+
+      if (foundProject) {
+        setProjectData(foundProject);
+        setLoading(false);
+      } else {
+        setError("Project not found.");
         setLoading(false);
       }
     };
 
-    loadProject();
-  }, [id, cachedProjects, setCachedProject]);
+    fetchProject();
+  }, [id, projects]); // Triggered when `id` or `projects` change
 
+  // Render loading state
   if (loading) {
-    return <p>Loading project...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading project...</p>
+      </div>
+    );
   }
 
-  if (error || !projectData) {
-    return <p className="text-red-500">{error || "Project not found."}</p>;
+  // Render error message if project is not found
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
+
+  // If project data doesn't exist, show an error message
+  if (!projectData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Project not found.</p>
+      </div>
+    );
   }
 
   return (
@@ -70,7 +100,7 @@ const ProjectDisplayPage: React.FC = () => {
           <h1 className="text-5xl font-extrabold drop-shadow-md text-white">
             {projectData.title}
           </h1>
-          <p className="mt-4 text-lg text-gray-300 mb-9">Level: {projectData.level}</p>
+          <p className="mt-4 text-lg text-gray-300 mb-9 uppercase">{projectData.level}</p>
           <div className="mt-6 flex justify-center gap-3 flex-wrap">
             {(Array.isArray(projectData.tags) ? projectData.tags : []).map((tag) => (
               <span
@@ -92,7 +122,7 @@ const ProjectDisplayPage: React.FC = () => {
       <div className="relative max-w-7xl mx-auto -mt-16">
         <div className="overflow-hidden rounded-lg shadow-lg relative">
           <img
-            src={`http://localhost:5000/uploads/${projectData.cover_image}`}
+            src={`http://localhost:5000/uploads/${projectData.image}`}
             alt="Project Cover"
             className="w-full h-[500px] object-cover transform hover:scale-110 transition-transform duration-500"
           />
@@ -141,34 +171,3 @@ const ProjectDisplayPage: React.FC = () => {
 };
 
 export default ProjectDisplayPage;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

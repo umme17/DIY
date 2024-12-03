@@ -115,7 +115,7 @@ const filteredThreads = threads.filter((thread) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="sticky top-0 bg-white p-4 z-50 shadow-md">
+      <div className="sticky top-0 bg-white p-4 z-40 shadow-md">
         <div className="flex gap-8 justify-center text-sm sm:text-base font-medium text-gray-600">
           {[
             { label: "All", info: "" },
@@ -137,6 +137,7 @@ const filteredThreads = threads.filter((thread) => {
               >
                 {tab.label}
               </span>
+              
               <span
                 className={`absolute bottom-0 left-0 h-0.5 w-full transform transition-transform duration-300 ${
                   activeTab === tab.label

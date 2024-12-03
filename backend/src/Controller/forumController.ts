@@ -3,6 +3,7 @@ import { createForumInDb, getAllForumsFromDb, getForumByIdFromDb } from "../mode
 import { Forum } from "../types/Forum";
 import { v4 as uuidv4 } from "uuid";
 
+
 // Extending Request to include `user` for authenticated routes
 interface AuthRequest extends Request {
   user?: { id: string }; // Custom user property
