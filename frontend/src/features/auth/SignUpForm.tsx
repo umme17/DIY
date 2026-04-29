@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import background from "../assets/background.png";
 import logo from "../assets/logo.png";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 
-const Register = () => {
+const SignUpForm = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -173,4 +173,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default SignUpForm;

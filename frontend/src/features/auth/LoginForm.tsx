@@ -2,14 +2,14 @@ import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import background from "../assets/background.png";
 import logo from "../assets/logo.png"; // Import your logo
-import { fetchAllProjects } from "../controllers/ProjectController";
-import { AllProjectContext } from "../contexts/ProjectContext";
+import { fetchAllProjects } from "../../controllers/ProjectController";
+import { AllProjectContext } from "../../contexts/ProjectContext";
 
-import {useAuth} from "../hooks/useAuth";
+import {useAuth} from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 
 
-const Login = () => {
+const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Hook to handle navigation
@@ -102,7 +102,7 @@ const Login = () => {
           <p className="mt-6 text-center text-sm text-gray-600">
             New here?{" "}
             <span
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/signup")}
               className="text-purple-500 font-medium hover:underline cursor-pointer"
             >
               Create your account.
@@ -124,4 +124,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginForm;
