@@ -1,6 +1,7 @@
 import express from 'express';
-import userRoutes from './modules/user/user.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
+import userRoutes from './modules/user/user.routes.js';
+import projectRoutes from './modules/project/project.routes.js';
 import cors from 'cors';
 import {errorHandler} from './middlewares/errHandler.js';
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
 
 app.use(errorHandler);
 

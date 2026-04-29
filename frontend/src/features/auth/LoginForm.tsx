@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import background from "../assets/background.png";
-import logo from "../assets/logo.png"; // Import your logo
+import background from "../../assets/background.png";
+import logo from "../../assets/logo.png"; // Import your logo
 import { fetchAllProjects } from "../../controllers/ProjectController";
 import { AllProjectContext } from "../../contexts/ProjectContext";
 
