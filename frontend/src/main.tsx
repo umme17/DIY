@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.tsx';
 import {AuthProvider} from "./contexts/AuthContext.tsx";
+import { Toaster } from 'react-hot-toast';
 
 interface Project {
   id: number;
@@ -24,6 +25,7 @@ const RootComponent = () => {
   return (
       <BrowserRouter>
         <AuthProvider>
+          <Toaster position="top-center"  />
           <App />
         </AuthProvider>
       </BrowserRouter>

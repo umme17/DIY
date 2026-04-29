@@ -6,8 +6,16 @@ export const createUser = async(req:Request, res:Response, next:NextFunction) =>
     
     try{
         const {firstName, lastName, email, password,profilePic} = signupSchema.parse(req.body);
-        const user = await authService.signUpService(firstName, lastName, email, password, profilePic);
-        res.status(201).json(user);
+        const result= await authService.signUpService(firstName, lastName, email, password, profilePic);
+
+        res.cookie('refreshToken', result.refreshToken, {
+        httpOnly:true,
+        secure:true,
+        sameSite:"strict",
+    })
+
+    res.json({accessToken: result.accessToken, user: result.user});
+    res.status(201).json(result);
     }catch(error){
         next(error);
     }

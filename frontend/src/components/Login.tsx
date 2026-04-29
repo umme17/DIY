@@ -5,46 +5,30 @@ import logo from "../assets/logo.png"; // Import your logo
 import { fetchAllProjects } from "../controllers/ProjectController";
 import { AllProjectContext } from "../contexts/ProjectContext";
 
+import {useAuth} from "../hooks/useAuth";
+import toast from "react-hot-toast";
+
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Hook to handle navigation
   const { setProjects } = useContext(AllProjectContext) ?? { setProjects: () => {} }; // Default fallback
+  const {login} = useAuth();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const credentials = {
-      email,
-      password,
-    };
-
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("token", data.token); // Store token for authenticated access
-
-        // Fetch all projects after login and update context
-        const projects = await fetchAllProjects();
-        setProjects(projects); // Set fetched projects in context
-
-        navigate("/dashboard"); // Navigate to the dashboard after successful login
-      } else {
-        const errorData = await response.json();
-        alert(`Login failed: ${errorData.message}`);
-      }
+    try{
+      const response = await login({ email, password });
+        if(response){
+          toast.success("Login successful!");
+          navigate("/dashboard");
+        }
+      
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Login failed. Please try again later.");
+      toast.error("Login failed. Please try again later.");
     }
   };
 
