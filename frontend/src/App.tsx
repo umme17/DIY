@@ -8,10 +8,31 @@ import ThreadDetails from './components/discussion/ThreadDetails';
 import CreateProject from './pages/CreateProject';
 import ProjectDisplayPage from './pages/ShowProject';
 import Consultation from './pages/ConsultationPage';
+import ProtectedRoute from './pages/ProtectedRoute';
 
 const App = () => {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route element = {<ProtectedRoute/>}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/forum" element={<ForumPage />} />
+        <Route path="/consultation" element={<Consultation />} />
+        <Route path="/createProject" element={<CreateProject />} />
+        <Route path="/displayproject/:id" element={<ProjectDisplayPage />} />
+        <Route path="/thread/:id" element={<ThreadDetails />} />
+      </Route>
+    </Routes>
+  );
+};
+
+export default App;
+
+
+
+{/* <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
@@ -21,8 +42,4 @@ const App = () => {
       <Route path="/createProject" element={<CreateProject />} />
       <Route path="/displayproject/:id" element={<ProjectDisplayPage />} />
       <Route path="/thread/:id" element={<ThreadDetails />} />
-    </Routes>
-  );
-};
-
-export default App;
+    </Routes> */}

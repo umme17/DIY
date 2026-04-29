@@ -1,9 +1,9 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode} from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.tsx';
-import { AllProjectContext } from './contexts/ProjectContext';
+import {AuthProvider} from "./contexts/AuthContext.tsx";
 
 interface Project {
   id: number;
@@ -20,15 +20,13 @@ interface Project {
 }
 
 const RootComponent = () => {
-  // Initialize projects state as null
-  const [projects, setProjects] = useState<Project[] | null>(null);
 
   return (
-    <AllProjectContext.Provider value={{ projects, setProjects }}>
       <BrowserRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </BrowserRouter>
-    </AllProjectContext.Provider>
   );
 };
 
